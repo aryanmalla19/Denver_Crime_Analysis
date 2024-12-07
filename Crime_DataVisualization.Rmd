@@ -1,0 +1,328 @@
+---
+title: "Crime - Project"
+author: "Aryan Malla"
+date: "`r Sys.Date()`"
+output: pdf_document
+---
+
+
+```{r}
+library(ggplot2)
+library(readr)
+library(dplyr)
+library(lubridate)  
+```
+
+
+```{r}
+# Load the datasets
+crime_data <- read_csv("crime.csv")
+offense_codes <- read_csv("offense_codes.csv")
+
+glimpse(crime_data)
+glimpse(offense_codes)
+```
+
+
+```{r}
+
+# 1. Correct data types in crime_data
+crime_data <- crime_data %>%
+  mutate(
+    # Parse date columns correctly
+    first_occurrence_date = mdy_hms(first_occurrence_date),  # e.g., "2/10/2022 2:50:00 AM"
+    last_occurrence_date = mdy_hms(last_occurrence_date, quiet = TRUE),
+    reported_date = mdy_hms(reported_date),
+    
+    # Extract additional time-based features
+    YEAR = year(first_occurrence_date),
+    MONTH = month(first_occurrence_date),
+    DAY = day(first_occurrence_date),
+
+    # Correct other data types
+    district_id = as.factor(district_id),
+    neighborhood_id = as.factor(neighborhood_id),
+    geo_lat = as.numeric(geo_lat),
+    geo_lon = as.numeric(geo_lon),
+    precinct_id = as.integer(precinct_id),
+    victim_count = as.integer(victim_count)
+  )
+
+# 2. Correct data types in offense_codes
+offense_codes <- offense_codes %>%
+  mutate(
+    OFFENSE_CODE = as.integer(OFFENSE_CODE),
+    OFFENSE_CODE_EXTENSION = as.integer(OFFENSE_CODE_EXTENSION),
+    OFFENSE_TYPE_NAME = as.factor(OFFENSE_TYPE_NAME),
+    OFFENSE_CATEGORY_NAME = as.factor(OFFENSE_CATEGORY_NAME),
+    IS_CRIME = as.logical(IS_CRIME),
+    IS_TRAFFIC = as.logical(IS_TRAFFIC)
+  )
+
+```
+
+
+```{r}
+# 3. Merge datasets on 'offense_code' and 'OFFENSE_CODE'
+data <- crime_data %>%
+  left_join(
+    offense_codes,
+    by = c("offense_code" = "OFFENSE_CODE", 
+           "offense_code_extension" = "OFFENSE_CODE_EXTENSION")
+  )
+
+# 4. Verify the merged data structure
+glimpse(data)
+```
+
+
+
+
+```{r}
+ set.seed(1000) # Make the sample reproducible
+ dsmall <- data[sample(nrow(data), 1000),]
+ dsmall
+```
+
+```{r}
+dsmall <- dsmall %>%
+  mutate(
+    incident_id = as.character(incident_id),
+    offense_id = as.character(offense_id),
+    offense_code = as.integer(offense_code),
+    offense_code_extension = as.integer(offense_code_extension),
+    offense_type_id = as.character(offense_type_id),
+    offense_category_id = as.character(offense_category_id),
+    first_occurrence_date = parse_date_time(first_occurrence_date, orders = c("ymd HMS", "mdy HMS")),
+    last_occurrence_date = parse_date_time(last_occurrence_date, orders = c("ymd HMS", "mdy HMS")),
+    reported_date = parse_date_time(reported_date, orders = c("ymd HMS", "mdy HMS")),
+    incident_address = as.character(incident_address),
+    geo_x = as.numeric(geo_x),
+    geo_y = as.numeric(geo_y),
+    geo_lon = as.numeric(geo_lon),
+    geo_lat = as.numeric(geo_lat),
+    district_id = as.character(district_id),
+    precinct_id = as.integer(precinct_id),
+    neighborhood_id = as.character(neighborhood_id),
+    victim_count = as.integer(victim_count),
+    YEAR = as.integer(YEAR),
+    MONTH = as.integer(MONTH),
+    DAY = as.integer(DAY),
+    OBJECTID = as.integer(OBJECTID),
+    OFFENSE_TYPE_ID = as.character(OFFENSE_TYPE_ID),
+    OFFENSE_TYPE_NAME = as.character(OFFENSE_TYPE_NAME),
+    OFFENSE_CATEGORY_ID = as.character(OFFENSE_CATEGORY_ID),
+    OFFENSE_CATEGORY_NAME = as.character(OFFENSE_CATEGORY_NAME)
+  )
+
+glimpse(dsmall)
+```
+
+```{r}
+# 1. Convert date columns to proper date-time format
+# Using parse_date_time with multiple format guesses to handle potential format issues
+crime_data <- crime_data %>%
+  mutate(
+    first_occurrence_date = parse_date_time(first_occurrence_date, orders = c("mdy HMS", "mdy IMSp", "mdY HM")),
+    last_occurrence_date = parse_date_time(last_occurrence_date, orders = c("mdy HMS", "mdy IMSp", "mdY HM"), quiet = TRUE), # Handle missing/incorrect values quietly
+    reported_date = parse_date_time(reported_date, orders = c("mdy HMS", "mdy IMSp", "mdY HM"))
+  )
+
+# 2. Handle missing values in 'last_occurrence_date'
+# Replace missing 'last_occurrence_date' with 'first_occurrence_date' if applicable
+crime_data <- crime_data %>%
+  mutate(last_occurrence_date = ifelse(is.na(last_occurrence_date), 
+                                       first_occurrence_date, 
+                                       last_occurrence_date))
+
+
+# 4. Convert binary columns to logical (TRUE/FALSE)
+crime_data <- crime_data %>%
+  mutate(
+    is_crime = as.logical(is_crime),
+    is_traffic = as.logical(is_traffic)
+  )
+
+# 5. View summary to check data cleaning results
+summary(crime_data)
+
+```
+
+
+
+
+
+
+
+
+```{r}
+data %>%
+  mutate(date = as.Date(first_occurrence_date)) %>%
+  group_by(date) %>%
+  summarize(count = n()) %>%
+  ggplot(aes(x = date, y = count)) +
+  geom_line(color = "darkred") +
+  theme_minimal() +
+  labs(title = "Number of Incidents Over Time", x = "Date", y = "Incident Count")
+
+```
+
+
+
+
+```{r}
+dsmall %>%
+  ggplot(aes(x = factor(MONTH), y = factor(YEAR), fill = ..count..)) +
+  geom_bin2d() +
+  theme_minimal() +
+  labs(title = "Heatmap of Incidents by Month and Year", x = "Month", y = "Year")
+
+```
+
+
+```{r}
+ggplot(dsmall, aes(x = geo_lon)) +
+  geom_density(fill = "darkred", alpha = 0.5) +
+  theme_minimal() +
+  labs(title = "Density of Incidents across Longitude", x = "Longitude")
+
+```
+
+
+```{r}
+dsmall %>%
+  count(offense_type_id, sort = TRUE) %>%
+  slice(1:10) %>%
+  ggplot(aes(x = reorder(offense_type_id, n), y = n)) +
+  geom_segment(aes(xend = offense_type_id, yend = 0), color = "gray") +
+  geom_point(color = "darkred", size = 3) +
+  coord_flip() +
+  labs(title = "Top 10 Offense Types", x = "Offense Type", y = "Count")
+
+```
+
+```{r}
+ggplot(dsmall, aes(x = offense_category_id, y = victim_count)) +
+  geom_jitter(width = 0.2, alpha = 0.5) +
+  coord_flip() +
+  theme_minimal() +
+  labs(title = "Victim Count per Offense Category")
+
+```
+
+```{r}
+ggplot(data, aes(x = district_id, fill = factor(YEAR))) +
+  geom_bar(position = "dodge") +
+  theme_minimal() +
+  labs(title = "Incidents by District and Year", x = "District", y = "Count")
+```
+
+```{r}
+ggplot(dsmall, aes(x = geo_lon, y = geo_lat, size = victim_count)) +
+  geom_point(alpha = 0.5) +
+  theme_minimal() +
+  labs(title = "Bubble Plot of Incidents", x = "Longitude", y = "Latitude")
+
+```
+
+
+
+```{r}
+ggplot(dsmall, aes(x = YEAR)) +
+  geom_line(stat = "count", color = "blue") +
+  labs(title = "Crimes Over Time by Year", x = "Year", y = "Count")
+
+```
+
+```{r}
+ggplot(data, aes(x = MONTH)) +
+  geom_line(stat = "count", color = "darkred") +
+  facet_wrap(~ YEAR) +
+  labs(title = "Monthly Crime Trends", x = "Month", y = "Count")
+
+```
+```{r}
+ggplot(data, aes(x = as.Date(first_occurrence_date), y = victim_count)) +
+  geom_line(stat = "summary", fun = "sum", color = "darkred") +
+  labs(title = "Victim Count Over Time", x = "Date", y = "Total Victims")
+
+```
+
+```{r}
+ggplot(data, aes(x = district_id)) + 
+  geom_bar(fill = 'darkred') + 
+  labs(title = 'Crimes by District', x = 'District', y = 'Crime Count')
+
+```
+
+```{r}
+ggplot(dsmall, aes(x = offense_category_id)) + 
+  geom_bar(fill = 'darkred') + 
+  theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+  labs(title = 'Crime Breakdown by Category', x = 'Crime Category', y = 'Count')
+
+```
+
+
+```{r}
+dsmall %>%
+  count(offense_category_id, sort = TRUE) %>%
+  head(10) %>%
+  ggplot(aes(x = reorder(offense_category_id, n), y = n)) +
+  geom_bar(stat = "identity", fill = "darkred") +
+  coord_flip() + labs(title = "Top 10 Offense Categories", x = "Category", y = "Count")
+```
+
+
+```{r}
+ggplot(dsmall, aes(x = geo_lon, y = geo_lat)) +
+  geom_point(alpha = 0.2) + labs(title = "Incident Locations")
+
+```
+
+```{r}
+crime_data <- crime_data %>%
+  mutate(weekday = wday(first_occurrence_date, label = TRUE))
+
+ggplot(crime_data, aes(x = weekday)) +
+  geom_bar(fill = 'darkred') +
+  labs(title = 'Crimes by Weekday', x = 'Day of the Week', y = 'Count') +
+  theme_minimal()
+
+```
+
+
+```{r}
+crime_data <- dsmall %>%
+  mutate(hour = hour(first_occurrence_date))
+
+ggplot(crime_data, aes(x = factor(hour))) +
+  geom_bar(fill = 'darkred') +
+  labs(title = 'Crimes by Time of Day', x = 'Hour of Day', y = 'Count') +
+  theme_minimal()
+
+```
+
+```{r}
+dsmall %>%
+  group_by(neighborhood_id) %>%
+  summarize(total_victims = sum(victim_count, na.rm = TRUE)) %>%
+  arrange(desc(total_victims)) %>%
+  slice(1:10) %>%
+  ggplot(aes(x = reorder(neighborhood_id, total_victims), y = total_victims)) +
+  geom_bar(stat = "identity", fill = "darkred") +
+  coord_flip() +
+  labs(title = "Top 10 Neighborhoods with Highest Victim Counts", x = "Neighborhood", y = "Total Victims")
+
+```
+
+```{r}
+ggplot(crime_data, aes(x = geo_lon, y = geo_lat)) +
+  stat_density2d(aes(fill = ..level..), geom = "polygon", alpha = 0.5) +
+  scale_fill_viridis_c() +
+  labs(title = "Crime Clusters - Geospatial Heatmap", x = "Longitude", y = "Latitude") +
+  theme_minimal()
+```
+
+
+

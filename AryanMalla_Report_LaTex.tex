@@ -1,0 +1,316 @@
+\documentclass{article}
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage{geometry}
+\usepackage{float}
+\usepackage{enumitem}
+\usepackage{tocloft}
+\usepackage[hidelinks]{hyperref}
+
+
+% Adjust margins
+\geometry{a4paper, margin=1in}
+
+\begin{document}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1\textwidth]{bcu_logo.jpg}
+\end{figure}
+
+\begin{center}
+    \begin{minipage}{0.6\textwidth} % Adjust width to center the block
+    \begin{flushleft}
+        \Large\textbf{Student Name:}\hspace{0.2cm} Aryan Malla \\
+        \vspace{0.5cm}        \Large\textbf{Student ID:}\hspace{1cm} 23189617 \\
+        \vspace{0.5cm}
+        \Large\textbf{Course:}\hspace{1.5cm} Crime Data Visualization \\
+        \vspace{0.5cm}
+        \Large\textbf{Word Count:}\hspace{1cm} 2512 \\
+        \vspace{0.5cm}
+        \Large\textbf{Page Count:}\hspace{1.2cm} 15
+    \end{flushleft}
+    \end{minipage}
+\end{center}
+
+
+\newpage
+
+% Table of contents with dots aligned properly
+\renewcommand{\cftsecleader}{\cftdotfill{\cftdotsep}}
+\tableofcontents
+\newpage
+
+\listoffigures % List of Figures
+\newpage
+
+\section{Introduction}
+\label{sec:introduction}
+\subsection{Summarise}
+This report explores crime trends and patterns in Denver using a dataset from the National Incident-Based Reporting System (NIBRS). The dataset covers various types of criminal activities, including property crimes, violent offenses, drug-related crimes, and public disorder incidents. By leveraging visualizations, this report uncovers temporal and spatial patterns that shed light on the dynamics of crime within the city.
+
+The data covers several years and provides a comprehensive view of crime activity in different neighborhoods and districts. Additionally, the report delves into the time of day and specific weekdays that see heightened criminal activity, further aiding in resource allocation for crime prevention.
+
+Furthermore, an interactive Shiny app has been developed to visualize the data, which can be accessed at: \url{https://yg979g-aryan0malla.shinyapps.io/CrimeShiny/}.
+
+
+\subsection{Highlight}
+The report focuses on:
+\begin{itemize}
+    \item Yearly and monthly trends in criminal activities, revealing shifts in crime rates over time.
+    \item Correlations between offense categories and victim counts, providing insight into which crimes have the most severe impact.
+    \item Analysis of time-based patterns to identify peak hours and days for criminal incidents, guiding law enforcement in scheduling patrols and interventions.
+\end{itemize}
+
+
+\subsection{Future Scope of Visualization}
+Future work will incorporate predictive analysis to anticipate trends. By leveraging machine learning algorithms, it will be possible to predict where and when crimes are likely to occur, allowing for proactive intervention. Furthermore, integrating real-time data from law enforcement, such as calls for service, will enhance the responsiveness of crime prevention strategies. Additional layers of visualization can also be added to account for socio-economic factors, providing a more holistic view of the underlying causes of criminal activity in different areas.
+
+\section{Motivation and Objectives}
+\label{sec:motivation}
+Crime is a significant concern for communities and governments alike, influencing public safety, resource allocation, and policy-making. Understanding the factors contributing to crime patterns and trends is essential for informed decision-making and effective crime prevention strategies. This project aims to delve into the complex relationships between various variables such as location, time, and offense types, and how these factors collectively influence criminal activity.
+
+By utilizing a comprehensive dataset on crime incidents in Denver, this project seeks to uncover insights that can support law enforcement agencies and policy makers in developing data-driven strategies to combat crime. Through data analysis and visualization, we aspire to contribute valuable knowledge to the public discourse on crime, helping to enhance community safety and improve crime prevention efforts.
+
+
+\subsection{Questions about the dataset}
+The analysis addresses the following key questions:
+\begin{enumerate}
+    \item What are the most common crime categories in Denver?
+    \item How do crime rates vary over the years and months?
+    \item Are there specific timeframes with higher criminal activity?
+    \item Which districts report the highest number of crimes?
+    \item How do different offenses correlate with victim counts?
+\end{enumerate}
+
+\section{About the Dataset}
+
+The dataset contains detailed information about criminal offenses in the City and County of Denver. The crime data is combined with offense codes to provide insights into the types of offenses committed, locations, and other relevant attributes. This section covers the structure of the data, the cleaning steps performed, and handling of missing and duplicate values.
+
+\subsection{Data Description}
+
+The dataset consists of two primary components:
+\begin{itemize}
+    \item \textbf{Crime Data:} Includes details about individual incidents such as the offense type, location, date, and other attributes. 
+    \item \textbf{Offense Codes:} A separate dataset with detailed codes and descriptions for each type of offense, which is merged with the crime data for further analysis.
+\end{itemize}
+
+Key variables in the dataset:
+\begin{itemize}
+    \item \textbf{offense\_id:} Unique identifier for each offense.
+    \item \textbf{incident\_id:} Unique identifier for the occurrence of offenses.
+    \item \textbf{first\_occurrence\_date, last\_occurrence\_date, reported\_date:} Date and time information for the offense.
+    \item \textbf{geo\_lat, geo\_lon:} Latitude and longitude of the crime location.
+    \item \textbf{victim\_count:} Number of victims involved in the incident.
+    \item \textbf{district\_id, neighborhood\_id:} District and neighborhood where the crime occurred.
+    \item \textbf{offense\_type\_id, offense\_category\_id:} Categorical information for the type of offense committed.
+\end{itemize}
+
+\subsection{Data Cleaning}
+The crime data required several preprocessing steps to ensure consistency and accuracy for further analysis. This included:
+\begin{itemize}
+    \item Converting date columns (e.g., \texttt{first\_occurrence\_date}, \texttt{reported\_date}) into a standard date-time format.
+    \item Parsing additional features such as \texttt{YEAR}, \texttt{MONTH}, and \texttt{DAY} from the dates for temporal analysis.
+    \item Converting categorical columns such as \texttt{district\_id} and \texttt{offense\_category\_id} to factors to facilitate visualization and aggregation.
+\end{itemize}
+
+\subsection{Handling Missing and Duplicate Values}
+Several columns had missing values, particularly in the date fields such as \texttt{last\_occurrence\_date}. Missing values were addressed by:
+\begin{itemize}
+    \item Replacing missing \texttt{last\_occurrence\_date} with \texttt{first\_occurrence\_date} where applicable.
+    \item Exact duplicates were removed to ensure each unique crime event was only counted once in the analysis.
+\end{itemize}
+
+
+
+\section{Data Analysis and Visualization}
+\label{sec:data_analysis}
+
+\subsection{Crime Trends by Category}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{top10.png}
+    \caption{Distribution of Crimes by Offense Category}
+    \label{fig:offense_category}
+\end{figure}
+The graph displays the top 10 offense categories. The most frequent offense is theft from motor vehicles, followed by auto theft and public disorder. These three categories exhibit the highest counts, indicating they are significant crime types. Other notable offenses include larceny and burglary, which reflect property-related crimes. Drug and alcohol offenses and aggravated assault appear with moderate frequency, suggesting recurring social issues. White-collar crime ranks lowest among the top ten.
+
+\subsection{Temporal Trends}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{crime_over_time.png}
+    \caption{Yearly Crime Trends in Denver}
+    \label{fig:crime_over_time}
+\end{figure}
+The graph shows the victim count over time. A general upward trend is observed from 2018 to 2020, followed by a more stable period until 2022. A significant spike in victim count occurs in 2022, followed by a gradual decline. The graph reveals fluctuating patterns, suggesting various factors influencing the victim count, such as changes in law enforcement practices, societal factors, and even the impact of the COVID-19 pandemic.
+
+\subsection{Crimes In Different Districts}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{district.png}
+    \caption{Crimes by District}
+    \label{fig:crime_by_district}
+\end{figure}
+Crime distribution varies significantly across districts, as shown in Figure~\ref{fig:crime_by_district}. Districts 3 and 6 have the highest crime counts, while districts 7 and U have the lowest. This data suggests a concentration of criminal activity in certain areas. Law enforcement agencies can use this information to allocate resources and prioritize crime prevention efforts in high-crime districts.
+
+
+\subsection{Heatmap - Months and Years}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{crime_hotspot_heatmap.png}
+    \caption{Crime Hotspot Heatmap}
+    \label{fig:crime_hotspot_heatmap}
+\end{figure}
+The heatmap visually represents the distribution of incidents across different months and years. The color intensity of each cell indicates the number of incidents, with darker shades representing higher counts. Analysis reveals a general upward trend in incidents from 2018 to 2023, with a notable spike in 2022. Certain months consistently have higher incident rates. This heatmap provides valuable insights for understanding temporal patterns and informing resource allocation and planning.
+
+
+\subsection{Monthly Crime Trends}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{month.png}
+    \caption{Monthly Crime Trends}
+    \label{fig:monthly_crime_trends}
+\end{figure}
+The graph shows a series of line graphs, each representing the monthly crime trends. The x-axis represents the months, while the y-axis indicates the count of crimes. Overall, the graphs show a trend of increasing crime rates from 2018 to 2022, with a significant spike in 2022. However, there are fluctuations within each year, with some months experiencing higher or lower crime rates compared to others. In 2023, there is a sharp decline in crime rates towards the end of the year.
+
+
+\subsection{Crimes by Time of Day}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{crime_by_time_of_day.png}
+    \caption{Crimes by Time of Day}
+    \label{fig:crime_by_time_of_day}
+\end{figure}
+The bar chart reveals that criminal activity tends to increase during the late afternoon and evening hours, peaking between 8 PM and 9 PM. There is a noticeable dip in crime occurrences during the early morning hours, particularly between 2 AM and 6 AM, likely due to decreased public activity at those times. The trend suggests that higher crime rates are correlated with times when more people are likely to be outside or commuting, which may provide more opportunities for crimes to occur.
+
+\subsection{Victim Count per Offense Category}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{victim_count_by_offense.png}
+    \caption{Crime Severity by Victim Count}
+    \label{fig:victim_count_by_offense}
+\end{figure}
+The plot shows that most offenses involve a single victim, especially in categories such as theft-from-motor-vehicle, larceny, and burglary. However, certain offense categories, such as aggravated assault and robbery, occasionally involve multiple victims, with up to five victims in a few cases. Crimes involving public disorder and other personal crimes also sometimes involve more than one victim. This pattern suggests that violent crimes, such as assaults and robberies, tend to affect multiple individuals at once, whereas property crimes usually target a single person or household.
+
+\subsection{Crimes by Weekday}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{wee.png}
+    \caption{Crimes by Weekday}
+    \label{fig:crimes_by_weekday}
+\end{figure}
+The "Crimes by Weekday" bar chart illustrates the distribution of criminal activities across different days of the week. The data shows a fairly consistent crime rate throughout the week, with a slight increase on Fridays. Crimes tend to occur slightly less on Sundays and Saturdays, suggesting lower activity during weekends compared to weekdays. This pattern may be linked to busier workdays, increased public interactions, and higher mobility on weekdays, creating more opportunities for crimes to occur. Friday's peak may correlate with the end of the workweek, where more social gatherings and outings could lead to increased crime rates.
+
+
+\subsection{Bubble Plot of Incidents}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{bubble_plot.png}
+    \caption{Bubble Plot of Incidents}
+    \label{fig:bubble_plot}
+\end{figure}
+The bubble plot shows the spatial distribution of incidents across different geographic locations, using latitude and longitude coordinates. Each bubble’s size represents the number of victims at that location. Larger bubbles indicate multiple victims, suggesting areas with higher concentrations of incidents. The dense clustering towards the center of the plot implies that most incidents occur in a specific region, potentially an urban area or crime hotspot. The spread toward the edges suggests some incidents occur in outlying areas but with less frequency. 
+
+\subsection{Top 10 Neighborhoods with Highest Victim Counts}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{neighborhood_victim_counts.png}
+    \caption{Top 10 Neighborhoods with Highest Victim Counts}
+    \label{fig:neighborhood_victim_counts}
+\end{figure}
+The bar chart ranks the top 10 neighborhoods by the total number of victims. The DIA (Denver International Airport) and CBD (Central Business District) have the highest victim counts, followed closely by Five Points and Central Park. This indicates that areas with high foot traffic or dense populations, such as airports and business hubs, are prone to more incidents. Neighborhoods like Union Station and Capitol Hill also exhibit significant victim counts, reflecting possible crime concentration in transport and residential areas. This visualization suggests the need for increased safety measures and preventive strategies in these neighborhoods.
+
+\subsection{Incident Location - Scatter Plot}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{incident.png}
+    \caption{Incident Location}
+    \label{fig:incident_location}
+\end{figure}
+The scatter plot represents incident locations using longitude and latitude coordinates. The points are spread across a specific geographic area, likely representing a city or urban region. The dense cluster of points near the center indicates a higher concentration of incidents, suggesting a hotspot of activity in that area. As you move away from the center, the points become more dispersed, implying fewer incidents in outlying regions. The plot provides a clear visual of how incidents are distributed geographically, showing that certain areas experience more incidents than others, likely reflecting population density or high-crime zones.
+
+\subsection{Density of Crime Places}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{geo.png}
+    \caption{Crime Clusters - Geospatial Heatmap}
+    \label{fig:incident_location}
+\end{figure}
+Similar to the previous plot.This heatmap visually represents more advanced detail like the spatial distribution of crime clusters in a specific area. The darker shades indicate higher concentrations of crime clusters, primarily in the central and northern regions. This visualization helps law enforcement agencies understand the spatial patterns of crime and allocate resources accordingly to address criminal activity in identified hotspots. So the green shade area has a greater risk for criminal activities.
+
+\newpage
+
+\section{Summary}
+\label{sec:summary}
+
+This report analyzed crime patterns in Denver, examining various aspects such as offense categories, spatial distribution, temporal trends, and victim counts. Through visualizations, several key insights emerged, confirming some initial assumptions and uncovering new trends.
+
+Observations and conclusions drawn from the report include:
+\begin{enumerate}
+    \item \textbf{Theft Dominates Crime Categories:} Theft-related offenses, such as auto theft and larceny, represent the most frequent crimes.
+    \item \textbf{District-Based Crime Concentration:} Districts 3 and 6 report the highest crime counts, suggesting concentrated criminal activity in these areas.
+    \item \textbf{Temporal Patterns:} Crime rates peak between 8 PM and 9 PM, with a slight reduction on weekends, reflecting public activity patterns.
+\end{enumerate}
+
+\subsection{Findings}
+
+\begin{enumerate}
+    \item \textbf{Q:} What are the most frequent crime categories in Denver? \\
+    \textbf{E:} Theft and motor vehicle-related crimes will be the most frequent. \\
+    \textbf{F:} This was confirmed—auto theft, larceny, and motor vehicle theft topped the list.
+
+    \item \textbf{Q:} How does crime vary across districts? \\
+    \textbf{E:} Certain districts will show higher crime counts. \\
+    \textbf{F:} This was proven—Districts 3 and 6 reported significantly higher crime rates.
+
+    \item \textbf{Q:} Are there specific times of day with increased criminal activity? \\
+    \textbf{E:} Crime will likely increase in the evening and at night. \\
+    \textbf{F:} Correct—most crimes occur between 8 PM and 9 PM, with a noticeable dip in early morning hours.
+
+    \item \textbf{Q:} Do crime rates differ between weekdays and weekends? \\
+    \textbf{E:} Weekday crime rates will be higher than weekends. \\
+    \textbf{F:} Confirmed—crime activity drops slightly during weekends, with Friday showing the highest weekday peak.
+\end{enumerate}
+
+There is potential for further research, especially by incorporating \textbf{predictive analytics} and exploring real-time crime data. Future efforts could also analyze the impact of interventions, such as increased police presence or community initiatives, on crime reduction.
+
+
+\section{Future Trends}
+\label{sec
+}
+
+Crime patterns in Denver are likely to evolve with demographic changes and advancements in technology. Future trends include:
+
+\begin{itemize} \item Predictive Policing: Leveraging historical data to anticipate crime hotspots. \item Real-Time Monitoring: Using IoT devices and smart city technologies for faster response. \item Cybercrime Growth: As technology advances, cyber-related offenses may increase. \item Community Policing: Strengthening public engagement through neighborhood programs. \item Impact of Population Growth: Rising population could shift crime patterns, requiring proactive adjustments. \end{itemize}
+
+Adapting to these trends will be critical for maintaining public safety in the coming years.
+
+
+\section{Conclusion}
+\label{sec:conclusion}
+In conclusion, this report highlights the importance of data-driven insights in addressing crime. By visualizing crime patterns, it becomes possible to allocate resources efficiently, anticipate trends, and ensure public safety. Property-related crimes dominate the dataset, suggesting a need for targeted interventions.
+
+Key recommendations:
+\begin{itemize}
+    \item Increase police presence in high-crime districts.
+    \item Launch community outreach programs to prevent property crimes.
+    \item Use temporal patterns to optimize patrol schedules.
+\end{itemize}
+
+\section{References}
+\label{sec:references}
+
+\begin{itemize}
+    \item National Incident-Based Reporting System (NIBRS). (2023) \textit{Denver Crime Data}. Available at: \url{https://nibrs.fbi.gov/} (Accessed: 20 October 2024).
+    
+    \item Knaflic, C.N. (2015) \textit{Storytelling with Data: A Data Visualization Guide for Business Professionals}. Hoboken: John Wiley \& Sons.
+    
+    \item Kirk, A. (2016) \textit{Data Visualisation: A Handbook for Data Driven Design}. London: SAGE Publications.
+    
+    \item Few, S. (2012) \textit{Show Me the Numbers: Designing Tables and Graphs to Enlighten}. 2nd edn. Burlingame: Analytics Press.
+    
+    \item Tufte, E.R. (2001) \textit{The Visual Display of Quantitative Information}. 2nd edn. Cheshire: Graphics Press.
+\end{itemize}
+
+
+\end{document}
